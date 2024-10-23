@@ -2,8 +2,34 @@ public class Car {
     private int id;
     private String name;
     private String state;
+
+
     private String number;
-    //private transient State truckState;
+    private transient State carState;
+
+    public void setCarState(){
+        switch (this.state){
+            case "onRoute" -> this.carState = new onParking();
+            case "onParking" -> this.carState = new onRoute();
+        }
+    }
+
+    public State getCarState() {
+        return carState;
+    }
+
+    public void setCarState(State carState) {
+        this.carState = carState;
+    }
+
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
 
     @Override
     public String toString() {
