@@ -2,10 +2,17 @@ public class Car {
     private int id;
     private String name;
     private String state;
-
-
     private String number;
     private transient State carState;
+
+
+    public void changeState(String state) {
+        try {
+            this.state = state;
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public void setCarState(){
         switch (this.state){
@@ -33,7 +40,7 @@ public class Car {
 
     @Override
     public String toString() {
-        return "Car " +
+        return " Car " +
                 "id=" + id +
                 " name='" + name + '\'' +
                 " state='" + state + '\'' +
