@@ -6,9 +6,10 @@ public class Action {
     public static void main() {
         Random rnd = new Random();
         List<Car> allCars = new ArrayList<>();
+        Map<Car, List<String>> journal = new HashMap<>(); // Изменили на Map<Car, List<String>>
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        // Автомобили, которые едут по городу
+        // Создаем автомобили
         for (int i = 1; i <= 200; i++) {
             String logo = Logo.random().toString();
             Car car = new Car(i, logo, "onRoute", "124");
@@ -22,32 +23,55 @@ public class Action {
 
         // Хранение информации о парковке
         Map<String, Car> inParking = new HashMap<>();
+
         while (current.isBefore(end) || current.isEqual(end)) {
             current = current.plusMinutes(5);
 
-            // Процентная вероятность
+            // Вероятности
             int probability = rnd.nextInt(34);
             int probabilityOut = rnd.nextInt(34);
 
-            // На парковке с вероятностью 3%
-            if (probability < 3) { // Если число в диапазоне 0, 1, или 2
-                Car car = allCars.get(rnd.nextInt(allCars.size()));
-                car.changeState("onParking");
-                inParking.put(current.format(formatter), car);
-                allCars.remove(car);
-                System.out.println("Парковка: " + car + " время: " + current.format(formatter));
+            // Въезд на парковку с вероятностью 3%
+            if (probability < 3) {
+                if (inParking.size() < 20) {
+                    Car car = allCars.get(rnd.nextInt(allCars.size()));
+                    car.changeState("onParking");
+                    inParking.put(current.format(formatter), car);
+                    allCars.remove(car);
+
+                    // Добавляем запись о въезде в журнал
+                    journal.putIfAbsent(car , new ArrayList<>());
+                    journal.get(car).add("Въезд: " + current.format(formatter));
+
+                    System.out.println("Парковка: " + car + " время: " + current.format(formatter));
+                } else {
+                    System.out.println("В парковке нет свободных мест. Приходите позже через 5 минут.");
+                }
             }
-            if (probabilityOut <3 && !inParking.isEmpty()){
-                List<String> key = new ArrayList<>(inParking.keySet());
-                String randomKey = key.get(rnd.nextInt(key.size()));
+
+            // Выезд с парковки с вероятностью 3%
+            if (probabilityOut < 3 && !inParking.isEmpty()) {
+                List<String> keys = new ArrayList<>(inParking.keySet());
+                String randomKey = keys.get(rnd.nextInt(keys.size()));
 
                 Car car = inParking.get(randomKey);
                 car.changeState("onRoute");
                 allCars.add(car);
                 inParking.remove(randomKey);
+
+                // Добавляем запись о выезде в журнал
+                journal.get(car).add("Выезд: " + current.format(formatter));
+
                 System.out.println("Возвращается на маршрут: " + car + " время: " + current.format(formatter));
             }
         }
 
+        // Вывод журнала по окончании цикла
+        System.out.println("\nЖурнал въездов и выездов:");
+        for (Map.Entry<Car, List<String>> entry : journal.entrySet()) {
+            Car car = entry.getKey();
+            List<String> events = entry.getValue();
+            System.out.println(car + " - События: " + events);
+        }
     }
 }
