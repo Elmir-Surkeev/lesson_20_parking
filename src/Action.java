@@ -6,9 +6,12 @@ public class Action {
     public static void main() {
         Random rnd = new Random();
         List<Car> allCars = new ArrayList<>();
-        Map<Car, List<String>> journal = new HashMap<>(); // Изменили на Map<Car, List<String>>
+        Map<Car, List<String>> journal = new HashMap<>();
+        List<String> parkedCars = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+        // Капитал парковки
+        long bankParking = 0;
         // Создаем автомобили
         for (int i = 1; i <= 200; i++) {
             String logo = Logo.random().toString();
@@ -22,7 +25,7 @@ public class Action {
         LocalDateTime current = now;
 
         // Хранение информации о парковке
-        Map<String, Car> inParking = new HashMap<>();
+        //Map<String, Car> inParking = new HashMap<>();
 
         while (current.isBefore(end) || current.isEqual(end)) {
             current = current.plusMinutes(5);
@@ -33,10 +36,11 @@ public class Action {
 
             // Въезд на парковку с вероятностью 3%
             if (probability < 3) {
-                if (inParking.size() < 20) {
+                if (parkedCars.size() < 20) {
                     Car car = allCars.get(rnd.nextInt(allCars.size()));
+                    parkedCars.add(car.getNumber());
                     car.changeState("onParking");
-                    inParking.put(current.format(formatter), car);
+//                    inParking.put(car.getNumber(), car);
                     allCars.remove(car);
 
                     // Добавляем запись о въезде в журнал
@@ -50,14 +54,17 @@ public class Action {
             }
 
             // Выезд с парковки с вероятностью 3%
-            if (probabilityOut < 3 && !inParking.isEmpty()) {
-                List<String> keys = new ArrayList<>(inParking.keySet());
+            if (probabilityOut < 3 && !parkedCars.isEmpty()) {
+
+                Parking record = journal.get();
+
+                List<String> keys = new ArrayList<>(parkedCars);
                 String randomKey = keys.get(rnd.nextInt(keys.size()));
 
-                Car car = inParking.get(randomKey);
+                Car car = parkedCars.get(randomKey);
                 car.changeState("onRoute");
                 allCars.add(car);
-                inParking.remove(randomKey);
+                parkedCars.remove(randomKey);
 
                 // Добавляем запись о выезде в журнал
                 journal.get(car).add("Выезд: " + current.format(formatter));
@@ -73,5 +80,8 @@ public class Action {
             List<String> events = entry.getValue();
             System.out.println(car + " - События: " + events);
         }
+    }
+    public void countTimeParking (Map<Car, List<String>> journal, int bankParking) {
+        journal.forEach(j -> bankParking+10);
     }
 }
