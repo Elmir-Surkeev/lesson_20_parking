@@ -7,7 +7,8 @@ public class Action {
         Random rnd = new Random();
         List<Car> allCars = new ArrayList<>();
         Map<Car, List<String>> journal = new HashMap<>();
-        List<String> parkedCars = new ArrayList<>();
+        Map<Car, LocalDateTime> parkingTimes = new HashMap<>();
+        List<Car> parkedCars = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         // Капитал парковки
@@ -21,7 +22,7 @@ public class Action {
 
         // Логика времени
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime end = now.plusDays(30);
+        LocalDateTime end = now.plusDays(7);
         LocalDateTime current = now;
 
         // Хранение информации о парковке
@@ -38,9 +39,9 @@ public class Action {
             if (probability < 3) {
                 if (parkedCars.size() < 20) {
                     Car car = allCars.get(rnd.nextInt(allCars.size()));
-                    parkedCars.add(car.getNumber());
+                    parkedCars.add(car);
+                    parkingTimes.put(car, current);
                     car.changeState("onParking");
-//                    inParking.put(car.getNumber(), car);
                     allCars.remove(car);
 
                     // Добавляем запись о въезде в журнал
@@ -56,20 +57,22 @@ public class Action {
             // Выезд с парковки с вероятностью 3%
             if (probabilityOut < 3 && !parkedCars.isEmpty()) {
 
-                Parking record = journal.get();
-
-                List<String> keys = new ArrayList<>(parkedCars);
-                String randomKey = keys.get(rnd.nextInt(keys.size()));
-
-                Car car = parkedCars.get(randomKey);
+                Car car = parkedCars.get(rnd.nextInt(parkedCars.size()));
                 car.changeState("onRoute");
                 allCars.add(car);
-                parkedCars.remove(randomKey);
+                parkedCars.remove(car);
+
+                LocalDateTime entryTime = parkingTimes.get(car);
+                long minutesParked = java.time.Duration.between(entryTime, current).toMinutes();
+                long fee = (minutesParked / 5) * 10;
+                bankParking += fee;
 
                 // Добавляем запись о выезде в журнал
                 journal.get(car).add("Выезд: " + current.format(formatter));
 
                 System.out.println("Возвращается на маршрут: " + car + " время: " + current.format(formatter));
+
+                parkedCars.remove(car);
             }
         }
 
@@ -80,8 +83,6 @@ public class Action {
             List<String> events = entry.getValue();
             System.out.println(car + " - События: " + events);
         }
-    }
-    public void countTimeParking (Map<Car, List<String>> journal, int bankParking) {
-        journal.forEach(j -> bankParking+10);
+        System.out.println("Общий капитал парковки: " + bankParking + " центов");
     }
 }
