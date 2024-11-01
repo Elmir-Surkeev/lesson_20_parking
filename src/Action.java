@@ -75,7 +75,6 @@ public class Action {
                 parkedCars.remove(car);
             }
         }
-
         // Вывод журнала по окончании цикла
         System.out.println("\nЖурнал въездов и выездов:");
         for (Map.Entry<Car, List<String>> entry : journal.entrySet()) {
@@ -84,5 +83,6 @@ public class Action {
             System.out.println(car + " - События: " + events);
         }
         System.out.println("Общий капитал парковки: " + bankParking + " центов");
+
     }
 }
