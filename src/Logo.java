@@ -1,7 +1,7 @@
 import java.util.Random;
 
 public enum Logo {
-    Lexus, Mercedes, BMW, Hyundai, Kia, 世界名车, Subaru;
+    LEXUS, MERCEDES, BMW, HYUNDAY, KIA, 世界名车, SUBARU;
     private static Random rnd = new Random();
 
     static Logo random(){

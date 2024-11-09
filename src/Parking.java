@@ -2,6 +2,12 @@ public class Parking extends Car{
     private int date;
     private Car car;
 
+    public Parking(int date, Car car) {
+        super(car.getId(), car.getName(), car.getState(), car.getNumber());
+        this.date = date;
+        this.car = car;
+    }
+
     public int getDate() {
         return date;
     }
@@ -16,12 +22,6 @@ public class Parking extends Car{
     }
 
     public void setCar(Car car) {
-        this.car = car;
-    }
-
-    public Parking(int date, Car car) {
-        super(car.getId(), car.getName(), car.getState(), car.getNumber());
-        this.date = date;
         this.car = car;
     }
 }

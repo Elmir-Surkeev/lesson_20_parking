@@ -5,20 +5,11 @@ public class Car {
     private String number;
     private transient State carState;
 
-
-    public void changeState(String state) {
-        try {
-            this.state = state;
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void setCarState(){
-        switch (this.state){
-            case "onRoute" -> this.carState = new onParking();
-            case "onParking" -> this.carState = new onRoute();
-        }
+    public Car(int id, String name, String state, String number) {
+        this.id = id;
+        this.name = String.valueOf(Logo.random());
+        this.state = state;
+        this.number = number;
     }
 
     public State getCarState() {
@@ -28,7 +19,6 @@ public class Car {
     public void setCarState(State carState) {
         this.carState = carState;
     }
-
 
     public String getNumber() {
         return number;
@@ -45,14 +35,6 @@ public class Car {
                 " name='" + name + '\'' +
                 " state='" + state + '\'' +
                 " number='" + number + '\'';
-    }
-
-    public Car(int id, String name, String state, String number) {
-        this.id = id;
-        this.name = name;
-        this.state = state;
-        this.number = number;
-        //this.truckState = truckState;
     }
 
     public int getId() {
@@ -77,6 +59,21 @@ public class Car {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public void changeState(String state) {
+        try {
+            this.state = state;
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setCarState(){
+        switch (this.state){
+            case "onRoute" -> this.carState = new onParking();
+            case "onParking" -> this.carState = new onRoute();
+        }
     }
 
 }
