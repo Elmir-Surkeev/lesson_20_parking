@@ -1,3 +1,7 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 public class Car {
     private int id;
     private String name;
@@ -7,7 +11,7 @@ public class Car {
 
     public Car(int id, String name, String state, String number) {
         this.id = id;
-        this.name = String.valueOf(Logo.random());
+        this.name = name;
         this.state = state;
         this.number = number;
     }
@@ -26,15 +30,6 @@ public class Car {
 
     public void setNumber(String number) {
         this.number = number;
-    }
-
-    @Override
-    public String toString() {
-        return " Car " +
-                "id=" + id +
-                " name='" + name + '\'' +
-                " state='" + state + '\'' +
-                " number='" + number + '\'';
     }
 
     public int getId() {
@@ -75,5 +70,25 @@ public class Car {
             case "onParking" -> this.carState = new onRoute();
         }
     }
+
+    public static List<Car> createCars(int numberOfCars){
+        List<Car> allCars = new ArrayList<>();
+        String name = String.valueOf(Logo.random());
+        for(int i = 1; i < numberOfCars; i++){
+            Car car = new Car(i, name, "onRoute", "100" );
+            allCars.add(car);
+        }
+        return allCars;
+    }
+
+    @Override
+    public String toString() {
+        return " Car " +
+                "id=" + id +
+                " name='" + name + '\'' +
+                " state='" + state + '\'' +
+                " number='" + number + '\'';
+    }
+
 
 }

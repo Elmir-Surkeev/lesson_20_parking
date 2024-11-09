@@ -1,5 +1,5 @@
 public interface State {
-    public void onChangeState(Car car);
-    public void onParking(Car car);
-    public void onRoute(Car car);
+    void onChangeState(Car car);
+    void onParking(Car car);
+    void onRoute(Car car);
 }

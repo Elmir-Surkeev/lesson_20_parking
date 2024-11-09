@@ -4,26 +4,18 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class Action {
-    private List<Car> allCars = new ArrayList<>();
+    private List<Car> allCars = new ArrayList<>(Car.createCars(200));
     private Map<Car, List<String>> journal = new HashMap<>();
     private Map<Car, LocalDateTime> parkingTimes = new HashMap<>();
     private static List<Car>  PARKED_CARS = new ArrayList<>();
     private static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static int MAX_PARKING_SPACE = 20;
-    private long bankParking = 0;
+    long bankParking = 0;
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime end = now.plusDays(7);
     LocalDateTime current = now;
     Random rnd = new Random();
 
-
-    void createCars(int numberOfCars) {
-        for (int i = 1; i <= numberOfCars; i++) {
-            String logo = Logo.random().toString();
-            Car car = new Car(i, logo, "onRoute", "124");
-            allCars.add(car);
-        }
-    }
 
     public void simulateParking() {
         while (current.isBefore(end) || current.isEqual(end)) {
