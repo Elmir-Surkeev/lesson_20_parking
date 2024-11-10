@@ -11,10 +11,10 @@ public class Action {
     private static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static int MAX_PARKING_SPACE = 20;
     long bankParking = 0;
-    LocalDateTime now = LocalDateTime.now();
-    LocalDateTime end = now.plusDays(7);
-    LocalDateTime current = now;
-    Random rnd = new Random();
+    private LocalDateTime now = LocalDateTime.now();
+    private LocalDateTime end = now.plusDays(7);
+    private LocalDateTime current = now;
+    private Random rnd = new Random();
 
 
     public void simulateParking() {
