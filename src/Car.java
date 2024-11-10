@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class Car {
@@ -71,14 +72,31 @@ public class Car {
         }
     }
 
-    public static List<Car> createCars(int numberOfCars){
+    public static List<Car> createCars(int numberOfCars) {
         List<Car> allCars = new ArrayList<>();
-        String name = String.valueOf(Logo.random());
-        for(int i = 1; i < numberOfCars; i++){
-            Car car = new Car(i, name, "onRoute", "100" );
+        Random rnd = new Random();
+
+        for (int i = 1; i <= numberOfCars; i++) {
+            String name = String.valueOf(Logo.random());
+            String personalNumber = String.format("%03d", rnd.nextInt(1500));
+            Car car = new Car(i, name, "onRoute", personalNumber);
             allCars.add(car);
         }
         return allCars;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Car car = (Car) o;
+        return Objects.equals(number, car.number);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(number);
     }
 
     @Override
