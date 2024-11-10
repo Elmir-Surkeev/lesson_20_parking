@@ -9,10 +9,11 @@ public class Action {
     private Map<Car, LocalDateTime> parkingTimes = new HashMap<>();
     private static List<Car>  PARKED_CARS = new ArrayList<>();
     private static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static int MAX_DAY_FOR_TEST = 30;
     private static int MAX_PARKING_SPACE = 20;
     long bankParking = 0;
     private LocalDateTime now = LocalDateTime.now();
-    private LocalDateTime end = now.plusDays(7);
+    private LocalDateTime end = now.plusDays(MAX_DAY_FOR_TEST);
     private LocalDateTime current = now;
     private Random rnd = new Random();
 
