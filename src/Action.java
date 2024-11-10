@@ -1,94 +1,94 @@
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class Action {
     private List<Car> allCars = new ArrayList<>(Car.createCars(200));
-    private Map<Car, List<String>> journal = new HashMap<>();
-    private Map<Car, LocalDateTime> parkingTimes = new HashMap<>();
-    private static List<Car>  PARKED_CARS = new ArrayList<>();
-    private static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static int MAX_PARKING_SPACE = 20;
+    private List<Car> parkedCars = new ArrayList<>();
+    private Map<String, List<String>> journal = new HashMap<>();
+    private static final int MAX_PARKING_SPACE = 20;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final int MAX_DAY_FOR_TEST = 30;
+    private static final LocalTime PAID_START_TIME = LocalTime.of(9, 0);
+    private static final LocalTime PAID_END_TIME = LocalTime.of(21, 0);
     long bankParking = 0;
-    private LocalDateTime now = LocalDateTime.now();
-    private LocalDateTime end = now.plusDays(7);
-    private LocalDateTime current = now;
+    private LocalDateTime currentTime = LocalDateTime.now();
     private Random rnd = new Random();
 
 
     public void simulateParking() {
-        while (current.isBefore(end) || current.isEqual(end)) {
-            current = current.plusMinutes(5);
+        LocalDateTime endTime = currentTime.plusDays(MAX_DAY_FOR_TEST);
 
-            int probabilityIn = rnd.nextInt(34);
-            int probabilityOut = rnd.nextInt(34);
+        while (!currentTime.isAfter(endTime)) {
+            currentTime = currentTime.plusMinutes(5);
 
-            attemptToParkCar(probabilityIn);
-            attemptToExitCar(probabilityOut);
-        }
-    }
-
-    public void attemptToParkCar(int probability) {
-        if (probability < 3 && PARKED_CARS.size() < MAX_PARKING_SPACE) {
-            Car car = allCars.get(rnd.nextInt(allCars.size()));
-            PARKED_CARS.add(car);
-            parkingTimes.put(car, current);
-            car.changeState("onParking");
-            allCars.remove(car);
-
-            journal.putIfAbsent(car, new ArrayList<>());
-            journal.get(car).add("Въезд: " + current.format(FORMATTER));
-
-            System.out.println("Парковка: " + car + " время: " + current.format(FORMATTER));
-        } else if (PARKED_CARS.size() >= MAX_PARKING_SPACE) {
-            System.out.println("В парковке нет свободных мест. Приходите позже через 5 минут.");
-        }
-    }
-
-    public void attemptToExitCar(int probability) {
-        if (probability < 3 && !PARKED_CARS.isEmpty()) {
-            Car car = PARKED_CARS.get(rnd.nextInt(PARKED_CARS.size()));
-            car.changeState("onRoute");
-            allCars.add(car);
-            PARKED_CARS.remove(car);
-
-            long fee = calculateParkingFee(car);
-            bankParking += fee;
-
-            journal.get(car).add("Выезд: " + current.format(FORMATTER));
-
-            System.out.println("Возвращается на маршрут: " + car + " время: " + current.format(FORMATTER));
-        }
-    }
-
-    public long calculateParkingFee(Car car) {
-        LocalDateTime entryTime = parkingTimes.get(car);
-        long minutesParked = java.time.Duration.between(entryTime, current).toMinutes();
-        return (minutesParked / 5) * 10;
-    }
-
-    public int calculateMoneyForOneDay(LocalDate date){
-        int day = 0;
-        for (Map.Entry<Car, LocalDateTime> entry : parkingTimes.entrySet()) {
-            Car car = entry.getKey();
-            LocalDateTime entryTime = entry.getValue();
-
-            if (entryTime.toLocalDate().equals(date)) {
-                long fee = calculateParkingFee(car);
-                day += fee;
+            for (Car car : allCars) {
+                if (car.getState().equals("onRoute") && rnd.nextInt(100) < 3) {
+                    attemptToParkCar(car);
+                } else if (car.getState().equals("onParking") && rnd.nextInt(100) < 3) {
+                    attemptToExitCar(car);
+                }
             }
         }
-        return day;
-
     }
 
-    public void printJournal() {
-        System.out.println("\nЖурнал въездов и выездов:");
-        for (Map.Entry<Car, List<String>> entry : journal.entrySet()) {
-            Car car = entry.getKey();
+    private void attemptToParkCar(Car car) {
+        if (parkedCars.size() < MAX_PARKING_SPACE) {
+            car.changeState("onParking");
+            parkedCars.add(car);
+            journal.putIfAbsent(car.getRegistrationNumber(), new ArrayList<>());
+            journal.get(car.getRegistrationNumber()).add("Въезд: " + currentTime.format(FORMATTER));
+        }
+    }
+
+    private void attemptToExitCar(Car car) {
+        car.changeState("onRoute");
+        parkedCars.remove(car);
+
+        LocalDateTime entryTime = LocalDateTime.parse(journal.get(car.getRegistrationNumber()).get(journal.get(car.getRegistrationNumber()).size() - 1).split(": ")[1], FORMATTER);
+        long parkedMinutes = java.time.Duration.between(entryTime, currentTime).toMinutes();
+
+        if (parkedMinutes > 30 && isWithinPaidHours(entryTime, currentTime)) {
+            long fee = (parkedMinutes / 5) * 10;
+            bankParking += fee;
+        }
+        journal.get(car.getRegistrationNumber()).add("Выезд: " + currentTime.format(FORMATTER));
+    }
+
+    private boolean isWithinPaidHours(LocalDateTime entryTime, LocalDateTime exitTime) {
+        LocalTime startTime = entryTime.toLocalTime().isBefore(PAID_START_TIME) ? PAID_START_TIME : entryTime.toLocalTime();
+        LocalTime endTime = exitTime.toLocalTime().isAfter(PAID_END_TIME) ? PAID_END_TIME : exitTime.toLocalTime();
+        return !startTime.isAfter(endTime);
+    }
+
+    public long calculateMoneyForOneDay(LocalDate date) {
+        long dayMoney = 0;
+        for (Map.Entry<String, List<String>> entry : journal.entrySet()) {
             List<String> events = entry.getValue();
-            System.out.println(car + " - События: " + events);
+            for (int i = 0; i < events.size() - 1; i += 2) {
+                String entryTimeStr = events.get(i).split(": ")[1];
+                String exitTimeStr = events.get(i + 1).split(": ")[1];
+                LocalDateTime entryTime = LocalDateTime.parse(entryTimeStr, FORMATTER);
+                LocalDateTime exitTime = LocalDateTime.parse(exitTimeStr, FORMATTER);
+
+                if (entryTime.toLocalDate().equals(date) && isWithinPaidHours(entryTime, exitTime)) {
+                    long minutesParked = java.time.Duration.between(entryTime, exitTime).toMinutes();
+                    if (minutesParked > 30) {
+                        dayMoney += (minutesParked / 5) * 10;
+                    }
+                }
+            }
+        }
+        return dayMoney;
+    }
+
+
+
+    public void printJournal() {
+        for (Map.Entry<String, List<String>> entry : journal.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
         }
     }
 }
