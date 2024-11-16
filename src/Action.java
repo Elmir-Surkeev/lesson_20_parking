@@ -1,3 +1,4 @@
+import java.sql.SQLOutput;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -8,7 +9,7 @@ public class Action {
     private Map<Car, List<String>> journal = new HashMap<>();
     private Map<Car, LocalDateTime> parkingTimes = new HashMap<>();
     private static List<Car>  PARKED_CARS = new ArrayList<>();
-    private static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static int MAX_DAY_FOR_TEST = 30;
     private static int MAX_PARKING_SPACE = 20;
     long bankParking = 0;
@@ -17,16 +18,13 @@ public class Action {
     private LocalDateTime current = now;
     private Random rnd = new Random();
 
-
     public void simulateParking() {
         while (current.isBefore(end) || current.isEqual(end)) {
             current = current.plusMinutes(5);
+            int probability = rnd.nextInt(34);
 
-            int probabilityIn = rnd.nextInt(34);
-            int probabilityOut = rnd.nextInt(34);
-
-            attemptToParkCar(probabilityIn);
-            attemptToExitCar(probabilityOut);
+            attemptToParkCar(probability);
+            attemptToExitCar(probability);
         }
     }
 
@@ -39,11 +37,11 @@ public class Action {
             allCars.remove(car);
 
             journal.putIfAbsent(car, new ArrayList<>());
-            journal.get(car).add("Въезд: " + current.format(FORMATTER));
+            journal.get(car).add("Въезд в путь: " + current.format(FORMATTER));
 
-            System.out.println("Парковка: " + car + " время: " + current.format(FORMATTER));
+            System.out.println("Парковка на базу: " + car + " время: " + current.format(FORMATTER));
         } else if (PARKED_CARS.size() >= MAX_PARKING_SPACE) {
-            System.out.println("В парковке нет свободных мест. Приходите позже через 5 минут.");
+            System.out.println("В на базе нет свободных мест. Приходите позже через 5 минут.");
         }
     }
 
@@ -81,10 +79,13 @@ public class Action {
             }
         }
         return day;
-
     }
 
     public void printJournal() {
+        System.out.println(journal);
+        System.out.println("ha;dslkafjlsdaljdsl");
+        System.out.println(parkingTimes.toString());
+        System.out.println("ha;dslkafjlsdaljdsl");
         System.out.println("\nЖурнал въездов и выездов:");
         for (Map.Entry<Car, List<String>> entry : journal.entrySet()) {
             Car car = entry.getKey();

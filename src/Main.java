@@ -9,5 +9,6 @@ public class Main {
         long dailyEarnings = action.calculateMoneyForOneDay(targetDate);
         System.out.println(dailyEarnings);
         System.out.println("Общий капитал парковки: " + action.bankParking + " центов");
+
     }
 }
